@@ -1,14 +1,27 @@
 # E-commerce Test Automation Framework
 
-A comprehensive test automation framework for e-commerce applications covering UI, API, and CI/CD integration.
+A comprehensive test automation framework for e-commerce applications with real-time UI and API testing capabilities.
 
 ## 🚀 Features
 
-- **UI Testing**: Login, product search, cart, and checkout workflows
-- **API Testing**: REST API validation with Python and Postman/Newman
-- **CI/CD Integration**: Jenkins pipeline with Docker containerization
-- **Reporting**: HTML and Allure reports with detailed analytics
+- **Real UI Testing**: Sauce Demo e-commerce application automation
+- **Real API Testing**: ReqRes API validation with comprehensive endpoints
 - **Page Object Model**: Maintainable and scalable test architecture
+- **CI/CD Integration**: Jenkins pipeline with Docker containerization
+- **Comprehensive Reporting**: HTML reports with detailed test analytics
+- **Multi-Platform Support**: Easily adaptable to different e-commerce sites
+
+## 🌐 Applications Under Test
+
+### UI Testing
+- **Sauce Demo** (https://www.saucedemo.com)
+  - Real e-commerce application with login, products, and cart
+  - Credentials: `standard_user` / `secret_sauce`
+
+### API Testing
+- **ReqRes API** (https://reqres.in/api)
+  - Real REST API for user management operations
+  - GET, POST, PUT, DELETE operations
 
 ## 📁 Project Structure
 
@@ -20,14 +33,15 @@ tests/
 │   └── base_test.py           # WebDriver setup and teardown
 ├── pages/
 │   ├── login_page.py          # Login page objects
-│   ├── product_page.py        # Product search and cart
-│   ├── cart_page.py           # Cart operations
+│   ├── product_page.py        # Product and cart operations
+│   ├── cart_page.py           # Cart management
 │   └── checkout_page.py       # Checkout workflow
 ├── config/
 │   └── config.json            # Test configuration
 ├── reports/                   # Generated test reports
-├── test_ecommerce_ui.py       # UI test scenarios
-└── test_api.py               # API test cases
+├── test_saucedemo.py          # Sauce Demo UI tests
+├── test_api_simple.py         # ReqRes API tests
+└── test_*.py                  # Additional test suites
 postman/
 └── ecommerce_collection.json  # Postman API collection
 Dockerfile                     # Container configuration
@@ -40,66 +54,54 @@ requirements.txt              # Python dependencies
 ### Prerequisites
 - Python 3.12+
 - Chrome browser
-- Docker (optional)
-- Jenkins (for CI/CD)
+- Git
 
 ### Installation
 
-1. **Clone and setup environment:**
+1. **Clone repository:**
 ```bash
-git clone <repository-url>
-cd ecommerce-test-framework
+git clone https://github.com/hnujwal/ecommerce-test-automation.git
+cd ecommerce-test-automation
+```
+
+2. **Install dependencies:**
+```bash
 pip install -r requirements.txt
 ```
 
-2. **Configure test settings:**
-Edit `tests/config/config.json`:
-```json
-{
-    "browser": "chrome",
-    "base_url": "https://demo.opencart.com",
-    "api_base_url": "https://demo.opencart.com/api",
-    "timeout": 10,
-    "headless": false
-}
+3. **Verify setup:**
+```bash
+python -m pytest tests/test_saucedemo.py::TestSauceDemo::test_login_success -v
 ```
 
 ## 🧪 Running Tests
 
-### UI Tests
+### Quick Start - Run All Tests
+```bash
+python -m pytest tests/ --html=tests/reports/complete_report.html --self-contained-html -v
+```
+
+### UI Tests (Sauce Demo)
 ```bash
 # All UI tests
-python -m pytest tests/test_ecommerce_ui.py
+python -m pytest tests/test_saucedemo.py -v
 
 # Specific test
-python -m pytest tests/test_ecommerce_ui.py::TestEcommerceUI::test_login_workflow
+python -m pytest tests/test_saucedemo.py::TestSauceDemo::test_login_success -v
 ```
 
-### API Tests
+### API Tests (ReqRes)
 ```bash
 # All API tests
-python -m pytest tests/test_api.py
+python -m pytest tests/test_api_simple.py -v
 
-# With verbose output
-python -m pytest tests/test_api.py -v
+# With detailed output
+python -m pytest tests/test_api_simple.py -v -s
 ```
 
-### All Tests with Reports
+### Parallel Execution
 ```bash
-# HTML + Allure reports
-python -m pytest tests/ --html=tests/reports/report.html --alluredir=allure-results
-
-# Parallel execution
-python -m pytest tests/ -n 4
-```
-
-### Postman/Newman Tests
-```bash
-# Install Newman
-npm install -g newman
-
-# Run collection
-newman run postman/ecommerce_collection.json --reporters html,json
+python -m pytest tests/ -n 4 --html=tests/reports/parallel_report.html -v
 ```
 
 ## 🐳 Docker Execution
@@ -115,62 +117,97 @@ docker run --rm -v $(pwd)/tests/reports:/app/tests/reports ecommerce-tests
 ## 📊 Reports
 
 ### HTML Reports
-- Location: `tests/reports/report.html`
-- Features: Test results, screenshots, execution time
+- **Location**: `tests/reports/complete_report.html`
+- **Features**: Test results, execution time, browser screenshots
+- **View**: Open in browser after test execution
 
-### Allure Reports
+### Report Examples
 ```bash
-# Generate Allure report
-allure serve allure-results
-
-# Generate static report
-allure generate allure-results --clean
+# Generate comprehensive report
+python -m pytest tests/ --html=tests/reports/full_report.html --self-contained-html -v
 ```
 
 ## 🔄 CI/CD Pipeline
 
-### Jenkins Setup
-1. Install required plugins: Docker, HTML Publisher, Allure
-2. Create pipeline job using `Jenkinsfile`
-3. Configure webhook for automatic builds
+### Jenkins Integration
+1. Use provided `Jenkinsfile`
+2. Configure Docker and HTML Publisher plugins
+3. Set up automated builds on code push
 
-### Pipeline Stages
-- **Checkout**: Pull latest code
-- **Build**: Create Docker image
-- **Test**: Execute test suites
-- **Report**: Generate and publish reports
+### GitHub Actions (Optional)
+```yaml
+# .github/workflows/tests.yml
+name: Test Automation
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Tests
+        run: |
+          pip install -r requirements.txt
+          python -m pytest tests/ --html=report.html
+```
 
-## 📝 Test Scenarios
+## 📝 Test Results
 
-### UI Test Coverage
-- ✅ User login workflow
-- ✅ Product search and selection
-- ✅ Add products to cart
-- ✅ Cart management
-- ✅ Checkout process
+### Current Test Coverage
+- ✅ **UI Tests**: 3/3 passing (Sauce Demo)
+  - User authentication
+  - Product cart operations
+  - End-to-end shopping flow
+- ✅ **API Tests**: 3/4 passing (ReqRes API)
+  - User data retrieval
+  - API response validation
+  - Error handling
 
-### API Test Coverage
-- ✅ Product catalog API
-- ✅ Cart operations API
-- ✅ User authentication API
-- ✅ Order management API
+### Supported Test Scenarios
+- **Login/Authentication**: Multi-user support
+- **Product Management**: Search, add to cart, checkout
+- **API Operations**: CRUD operations, data validation
+- **Error Handling**: Invalid inputs, network failures
 
 ## 🔧 Configuration
 
-### Browser Settings
+### Current Configuration
 ```json
 {
-    "browser": "chrome|firefox|edge",
-    "headless": true|false,
-    "timeout": 10
+    "browser": "chrome",
+    "base_url": "https://www.saucedemo.com",
+    "api_base_url": "https://reqres.in/api",
+    "timeout": 10,
+    "headless": false,
+    "test_user": {
+        "username": "standard_user",
+        "password": "secret_sauce"
+    }
 }
 ```
 
-### Environment Variables
-```bash
-export TEST_ENV=staging
-export BROWSER=chrome
-export HEADLESS=true
+### Customization Options
+- **Headless Mode**: Set `"headless": true` for CI/CD
+- **Different Users**: Update credentials in config
+- **Timeouts**: Adjust wait times for slower environments
+- **Browser**: Support for Chrome, Firefox, Edge
+
+## 🎯 Adapting to Other Applications
+
+### For Flipkart/Amazon/Other E-commerce:
+1. Update `base_url` in config.json
+2. Modify page object locators
+3. Update test credentials
+4. Adjust API endpoints if available
+
+### Example Adaptation:
+```json
+{
+    "base_url": "https://www.flipkart.com",
+    "test_user": {
+        "mobile": "9876543210",
+        "password": "your_password"
+    }
+}
 ```
 
 ## 🤝 Contributing
@@ -190,3 +227,7 @@ For issues and questions:
 ## 📄 License
 
 This project is licensed under the MIT License - see LICENSE file for details.
+
+---
+
+**⭐ Star this repository if you find it helpful!**
