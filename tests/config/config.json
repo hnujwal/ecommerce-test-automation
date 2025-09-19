@@ -1,0 +1,11 @@
+{
+    "browser": "chrome",
+    "base_url": "https://www.saucedemo.com",
+    "api_base_url": "https://reqres.in/api",
+    "timeout": 10,
+    "headless": false,
+    "test_user": {
+        "username": "standard_user",
+        "password": "secret_sauce"
+    }
+}
