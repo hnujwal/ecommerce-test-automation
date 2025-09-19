@@ -13,9 +13,9 @@ pipeline {
             steps {
                 echo 'Setting up Python environment...'
                 bat '''
-                    "C:\\Users\\Thinkpad\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe" --version || echo "Python version check failed"
-                    "C:\\Users\\Thinkpad\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe" -m pip install --upgrade pip || echo "Pip upgrade failed"
-                    "C:\\Users\\Thinkpad\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe" -m pip install -r requirements.txt || echo "Requirements install failed"
+                    py --version || echo "Python version check failed"
+                    py -m pip install --upgrade pip || echo "Pip upgrade failed"
+                    py -m pip install -r requirements.txt || echo "Requirements install failed"
                 '''
             }
         }
@@ -33,7 +33,7 @@ pipeline {
             steps {
                 echo 'Running API tests (no browser required)...'
                 bat '''
-                    "C:\\Users\\Thinkpad\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe" -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html || echo "API tests failed"
+                    py -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html || echo "API tests failed"
                 '''
             }
         }
