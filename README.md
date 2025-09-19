@@ -222,7 +222,7 @@ jobs:
 
 For issues and questions:
 - Create GitHub issue
-- Contact: test-automation-team@company.com
+- Contact: ujwalhn@gmail.com
 
 ## 📄 License
 
