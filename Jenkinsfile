@@ -9,49 +9,23 @@ pipeline {
             }
         }
         
-        stage('Setup Environment') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Installing Python dependencies...'
-                bat '''
-                    python.exe -m pip install --upgrade pip
-                    python.exe -m pip install -r requirements.txt
-                '''
+                echo 'Building Docker image with Python environment...'
+                script {
+                    bat 'docker build -t ecommerce-tests .'
+                }
             }
         }
         
-        stage('Create Reports Directory') {
+        stage('Run Tests in Docker') {
             steps {
-                echo 'Creating reports directory...'
-                bat '''
-                    if not exist "tests\\reports" mkdir "tests\\reports"
-                '''
-            }
-        }
-        
-        stage('Run UI Tests') {
-            steps {
-                echo 'Running Sauce Demo UI tests...'
-                bat '''
-                    python.exe -m pytest tests/test_saucedemo.py -v --html=tests/reports/ui_report.html --self-contained-html
-                '''
-            }
-        }
-        
-        stage('Run API Tests') {
-            steps {
-                echo 'Running ReqRes API tests...'
-                bat '''
-                    python.exe -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html
-                '''
-            }
-        }
-        
-        stage('Run All Tests') {
-            steps {
-                echo 'Running complete test suite...'
-                bat '''
-                    python.exe -m pytest tests/ -v --html=tests/reports/complete_report.html --self-contained-html
-                '''
+                echo 'Running all tests in Docker container...'
+                script {
+                    bat '''
+                        docker run --rm -v "%cd%\tests\reports:/app/tests/reports" ecommerce-tests
+                    '''
+                }
             }
         }
         
@@ -63,8 +37,8 @@ pipeline {
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'tests/reports',
-                    reportFiles: 'complete_report.html',
-                    reportName: 'Complete Test Report'
+                    reportFiles: 'report.html',
+                    reportName: 'Test Report'
                 ])
             }
         }
@@ -72,7 +46,10 @@ pipeline {
     
     post {
         always {
-            echo 'Cleaning up workspace...'
+            echo 'Cleaning up...'
+            script {
+                bat 'docker rmi ecommerce-tests || exit 0'
+            }
             cleanWs()
         }
         success {

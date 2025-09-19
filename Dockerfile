@@ -13,10 +13,16 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
+# Set display for headless Chrome
+ENV DISPLAY=:99
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY tests/ ./tests/
 COPY pytest.ini .
 
-CMD ["python", "-m", "pytest", "tests/", "--html=tests/reports/report.html", "--self-contained-html"]
+# Create reports directory
+RUN mkdir -p tests/reports
+
+CMD ["python", "-m", "pytest", "tests/", "--html=tests/reports/report.html", "--self-contained-html", "-v"]
