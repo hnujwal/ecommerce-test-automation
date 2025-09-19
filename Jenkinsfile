@@ -13,8 +13,17 @@ pipeline {
             steps {
                 echo 'Installing Python dependencies...'
                 bat '''
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    python.exe -m pip install --upgrade pip
+                    python.exe -m pip install -r requirements.txt
+                '''
+            }
+        }
+        
+        stage('Create Reports Directory') {
+            steps {
+                echo 'Creating reports directory...'
+                bat '''
+                    if not exist "tests\\reports" mkdir "tests\\reports"
                 '''
             }
         }
@@ -23,7 +32,7 @@ pipeline {
             steps {
                 echo 'Running Sauce Demo UI tests...'
                 bat '''
-                    python -m pytest tests/test_saucedemo.py -v --html=tests/reports/ui_report.html --self-contained-html
+                    python.exe -m pytest tests/test_saucedemo.py -v --html=tests/reports/ui_report.html --self-contained-html
                 '''
             }
         }
@@ -32,7 +41,7 @@ pipeline {
             steps {
                 echo 'Running ReqRes API tests...'
                 bat '''
-                    python -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html
+                    python.exe -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html
                 '''
             }
         }
@@ -41,7 +50,7 @@ pipeline {
             steps {
                 echo 'Running complete test suite...'
                 bat '''
-                    python -m pytest tests/ -v --html=tests/reports/complete_report.html --self-contained-html
+                    python.exe -m pytest tests/ -v --html=tests/reports/complete_report.html --self-contained-html
                 '''
             }
         }
