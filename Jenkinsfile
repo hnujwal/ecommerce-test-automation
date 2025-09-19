@@ -1,11 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        // Use Jenkins Python installation if available
-        python 'Python-3.12'
-    }
-    
     stages {
         stage('Checkout') {
             steps {
