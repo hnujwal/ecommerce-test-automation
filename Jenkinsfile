@@ -1,48 +1,89 @@
 pipeline {
     agent any
     
+    environment {
+        PYTHON_PATH = '/usr/bin/python3'
+        CHROME_BIN = '/usr/bin/google-chrome'
+    }
+    
     stages {
         stage('Checkout') {
             steps {
+                echo 'Checking out code from GitHub...'
                 checkout scm
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Setup Environment') {
             steps {
-                script {
-                    docker.build("ecommerce-tests:${env.BUILD_ID}")
-                }
+                echo 'Setting up Python environment...'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
         
-        stage('Run Tests') {
+        stage('Run UI Tests') {
             steps {
-                script {
-                    docker.image("ecommerce-tests:${env.BUILD_ID}").inside {
-                        sh 'python -m pytest tests/ --html=tests/reports/report.html --alluredir=allure-results'
-                    }
-                }
+                echo 'Running Sauce Demo UI tests...'
+                sh '''
+                    . venv/bin/activate
+                    python -m pytest tests/test_saucedemo.py -v --html=tests/reports/ui_report.html --self-contained-html
+                '''
             }
         }
         
-        stage('Generate Reports') {
+        stage('Run API Tests') {
             steps {
+                echo 'Running ReqRes API tests...'
+                sh '''
+                    . venv/bin/activate
+                    python -m pytest tests/test_api_simple.py -v --html=tests/reports/api_report.html --self-contained-html
+                '''
+            }
+        }
+        
+        stage('Run All Tests') {
+            steps {
+                echo 'Running complete test suite...'
+                sh '''
+                    . venv/bin/activate
+                    python -m pytest tests/ -v --html=tests/reports/complete_report.html --self-contained-html
+                '''
+            }
+        }
+        
+        stage('Publish Reports') {
+            steps {
+                echo 'Publishing HTML test reports...'
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'tests/reports',
-                    reportFiles: 'report.html',
-                    reportName: 'Test Report'
+                    reportFiles: 'complete_report.html',
+                    reportName: 'Complete Test Report'
                 ])
                 
-                allure([
-                    includeProperties: false,
-                    jdk: '',
-                    properties: [],
-                    reportBuildPolicy: 'ALWAYS',
-                    results: [[path: 'allure-results']]
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'tests/reports',
+                    reportFiles: 'ui_report.html',
+                    reportName: 'UI Test Report'
+                ])
+                
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'tests/reports',
+                    reportFiles: 'api_report.html',
+                    reportName: 'API Test Report'
                 ])
             }
         }
@@ -50,7 +91,14 @@ pipeline {
     
     post {
         always {
+            echo 'Cleaning up workspace...'
             cleanWs()
+        }
+        success {
+            echo '✅ Pipeline completed successfully!'
+        }
+        failure {
+            echo '❌ Pipeline failed. Check logs for details.'
         }
     }
 }
